@@ -8,7 +8,7 @@
 
 int main()
 {
-	int32_t frameCount = 10;
+	int32_t frameCount = 2;
 
 	//Scan all connected devices
 	Voxel::CameraSystem sys;
@@ -132,7 +132,7 @@ int main()
 		}
 	}
 
-	pcl::io::savePCDFileASCII("10frames.pcd", cloud);
+	pcl::io::savePCDFileASCII("3frames.pcd", cloud);
 	std::cerr << "Saved " << cloud.points.size() << " data points to test_pcd.pcd." << std::endl;
 	
 	

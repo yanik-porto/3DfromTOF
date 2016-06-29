@@ -9,13 +9,18 @@ CameraManager::~CameraManager()
 {
 }
 
-void CameraManager::get_pts(std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer ptr)
+void CameraManager::get_pts(std::vector<std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer> ptr)
 {
 	ptr = intPts;
 }
 
-bool CameraManager::capture(short nShots)
+pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(short nShots)
 {
+	numOfShots = nShots;
+
+	//Initialize the vector of points
+	intPts = std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >(nShots);
+
 	//Scan all connected devices
 	Voxel::CameraSystem sys;
 	Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
@@ -75,7 +80,7 @@ bool CameraManager::capture(short nShots)
 		lastTimeStamp = d->timestamp;
 
 		sz_cloud = d->size();
-		intPts = d->points.data();
+		intPts[count] = d->points.data();
 
 		//Stop when you have recorded enough frame
 		if (count >= frameCount)
@@ -86,6 +91,7 @@ bool CameraManager::capture(short nShots)
 
 	if (currentCam->start())
 	{
+		//Display framerate
 		Voxel::FrameRate r;
 		if (currentCam->getFrameRate(r))
 			Voxel::logger(Voxel::LOG_INFO) << "Capturing at a frame rate of " << r.getFrameRate() << " fps" << std::endl;
@@ -94,42 +100,39 @@ bool CameraManager::capture(short nShots)
 	else
 		std::cerr << "Could not start the depth camera " << currentCam->id() << std::endl;
 
+	//Convert from vector to pointCloud
+	cloud = convert2pcl(intPts);
 
-	return true;
+	std::cout << "Saved "
+		<< cloud->width * cloud->height
+		<< " data points from the camera " << listDev[0]->id()
+		<< std::endl;
+
+	return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::convert2pcl()
+pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::convert2pcl(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer > vecPts)
 {
-	for (int i = 0; i < 10; i++)
-	{
-		std::cout << "    " << intPts[i].x
-			<< " " << intPts[i].y
-			<< " " << intPts[i].z << std::endl;
-	}
+	//Convert from vector to point cloud
 
+	//Initialize the cloud with the size information
 	cloud = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
-	cloud->width = 320;
-	cloud->height = 240;
+	cloud->width = (sz_cloud)*(numOfShots);
+	cloud->height = 1;
 	cloud->is_dense = false;
 	cloud->points.resize(cloud->width * cloud->height);
 
-	for (int i = 0; i < cloud->points.size(); i++)
+	//Copy every coordinates
+	for (int j = 0; j <= numOfShots-1; j++)
 	{
-		cloud->points[i].x = intPts[i].x;
-		cloud->points[i].y = intPts[i].y;
-		cloud->points[i].z = intPts[i].z;
-		cloud->points[i].intensity = intPts[i].i;
+		for (int i = 0; i < sz_cloud; i++)
+		{
+			cloud->points[i + j*sz_cloud].x = intPts[j][i].x;
+			cloud->points[i + j*sz_cloud].y = intPts[j][i].y;
+			cloud->points[i + j*sz_cloud].z = intPts[j][i].z;
+			cloud->points[i + j*sz_cloud].intensity = intPts[j][i].i;
+		}
 	}
-
-	std::cout << "Loaded "
-		<< cloud->width * cloud->height
-		<< " data points from test_pcd.pcd with the following fields: "
-		<< std::endl;
-
-	for (size_t i = 0; i < 10; ++i)
-		std::cout << "    " << cloud->points[i].x
-		<< " " << cloud->points[i].y
-		<< " " << cloud->points[i].z << std::endl;
 
 	return cloud;
 }

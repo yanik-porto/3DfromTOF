@@ -12,21 +12,19 @@ pclManager::~pclManager()
 
 bool pclManager::set_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr ptcloud)
 {
+	//Set the cloud with an already existing pointCloud
 	cloud = ptcloud;
 
 	std::cout << "Loaded "
 		<< cloud->width * cloud->height
-		<< " data points from test_pcd.pcd with the following fields: "
+		<< " data points from point cloud"
 		<< std::endl;
-	for (size_t i = 0; i < cloud->points.size(); ++i)
-		std::cout << "    " << cloud->points[i].x
-		<< " " << cloud->points[i].y
-		<< " " << cloud->points[i].z << std::endl;
 	return true;
 }
 
 bool pclManager::set_cloud_from_pcd(const std::string &filename)
 {
+	//Set the cloud from a .pcd file
 	pcl::PointCloud<pcl::PointXYZI>::Ptr cloudPcd(new pcl::PointCloud<pcl::PointXYZI>);
 	if (pcl::io::loadPCDFile<pcl::PointXYZI>(filename, *cloudPcd) == -1) //* load the file
 	{
@@ -35,7 +33,7 @@ bool pclManager::set_cloud_from_pcd(const std::string &filename)
 	}
 	std::cout << "Loaded "
 		<< cloudPcd->width * cloudPcd->height
-		<< " data points from .pcd with the following fields: "
+		<< " data points from .pcd "
 		<< std::endl;
 
 	cloud = cloudPcd;
@@ -44,6 +42,7 @@ bool pclManager::set_cloud_from_pcd(const std::string &filename)
 
 bool pclManager::save2pcd(const std::string &filename)
 {
+	//Save the cloud in a .pcd file
 	pcl::io::savePCDFileASCII(filename, *cloud);
 	std::cerr << "Saved " << cloud->points.size() << " data points to test_pcd.pcd." << std::endl;
 	return true;
@@ -51,8 +50,8 @@ bool pclManager::save2pcd(const std::string &filename)
 
 void pclManager::visualizePcl()
 {
+	//Display the cloud
 	pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
-	//pcl::PointCloud<pcl::PointXYZI>::Ptr cloudPtr(&cloud);
 	viewer.showCloud(cloud);
 	while (!viewer.wasStopped())
 	{
