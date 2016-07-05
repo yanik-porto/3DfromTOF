@@ -8,6 +8,8 @@
 //#include <CameraSystem.h>
 #include "CameraManager.h"
 #include "pclManager.h"
+#include <vtkRenderWindow.h>
+#include <QVTKWidget.h>
 
 //using namespace Voxel;
 
@@ -36,6 +38,7 @@ private:
     CameraManager mngCam;
     pclManager mngPcl;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 };
 
 #endif // MAINWINDOW_H

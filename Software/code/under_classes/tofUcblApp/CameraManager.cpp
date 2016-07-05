@@ -1,9 +1,15 @@
 #include "CameraManager.h"
 
-CameraManager::CameraManager()
+CameraManager::CameraManager():
+    numOfShots(1)
 {
+
 }
 
+CameraManager::CameraManager(const short &n)
+{
+    numOfShots = n;
+}
 
 CameraManager::~CameraManager()
 {
@@ -11,23 +17,28 @@ CameraManager::~CameraManager()
 
 void CameraManager::get_pts(std::vector<std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer> ptr)
 {
+    //Will not work (const_pointer)
 	ptr = intPts;
+}
+
+void CameraManager::set_numOfShots(const short &n)
+{
+    numOfShots = n;
 }
 
 std::vector<std::string> CameraManager::get_devices_name()
 {
-    std::vector<std::string> listNames(2);
-
     //Scan all connected devices
     Voxel::CameraSystem sys;
     Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
 
-    //Go through all the devices and display their ID
+    //Initialize the list of devices
+    std::vector<std::string> listNames(listDev.size());
+
+    //Go through all the devices and get their ID
     int i = 0;
     for (auto &d : listDev)
     {
-        std::cout << i << std::endl;
-        std::cout << d->id() << std::endl;
         listNames[i] = static_cast<std::string>(d->id());
         i++;
     }
@@ -35,47 +46,37 @@ std::vector<std::string> CameraManager::get_devices_name()
     return listNames;
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(short nShots)
+pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_device)
 {
-	numOfShots = nShots;
 
 	//Initialize the vector of points
-	intPts = std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >(nShots);
+    intPts = std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >(numOfShots);
 
 	//Scan all connected devices
 	Voxel::CameraSystem sys;
 	Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
 
-	//Go through all the devices and display their ID
-	int i = 0;
-	for (auto &d : listDev)
-	{
-		i++;
-		std::cout << i << std::endl;
-		std::cout << d->id() << std::endl;
-	}
-
 	//Load and initialize the first detected camera
-	Voxel::DepthCameraPtr currentCam = sys.connect(listDev[0]);
+    Voxel::DepthCameraPtr currentCam = sys.connect(listDev[num_device]);
 
 	//std::cout << listDev[0]->id() << std::endl;
 
 	if (!currentCam)
 	{
-		std::cerr << "Could not load depth camera for device " << listDev[0]->id() << std::endl;
+        std::cerr << "Could not load depth camera for device " << listDev[num_device]->id() << std::endl;
 		return false;
 	}
 
 	if (!currentCam->isInitialized())
 	{
-		std::cerr << "Depth camera not initialized for device " << listDev[0]->id() << std::endl;
+        std::cerr << "Depth camera not initialized for device " << listDev[num_device]->id() << std::endl;
 		return false;
 	}
 
 	//Initialize variables
 	int count = 0;
 	Voxel::TimeStampType lastTimeStamp = 0;
-	int32_t frameCount = nShots - 1;
+    int32_t frameCount = numOfShots - 1;
 	
 	//Capture point cloud, called whenever the cam is started
 	currentCam->registerCallback(Voxel::DepthCamera::FRAME_XYZI_POINT_CLOUD_FRAME, [&](Voxel::DepthCamera &dc, const Voxel::Frame &frame, Voxel::DepthCamera::FrameType c)
@@ -126,7 +127,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(short nShots)
 
 	std::cout << "Saved "
 		<< cloud->width * cloud->height
-		<< " data points from the camera " << listDev[0]->id()
+        << " data points from the camera " << listDev[num_device]->id()
 		<< std::endl;
 
 	return cloud;

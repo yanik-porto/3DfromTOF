@@ -37,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent) :
     for(int i=0; i<list.size(); i++)
         ui->comboBox_devices->addItem(QString::fromStdString(list[i]));
 
+    viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
+    ui->widget_visu->SetRenderWindow(viewer->getRenderWindow());
+    viewer->setupInteractor(ui->widget_visu->GetInteractor(), ui->widget_visu->GetRenderWindow());
+    ui->widget_visu->update();
 }
 
 MainWindow::~MainWindow()
@@ -46,10 +50,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_capture_clicked()
 {
-    int nShots = ui->spinBox_nShots->value();
-    cloud = mngCam.capture(nShots);
+    mngCam.set_numOfShots(ui->spinBox_nShots->value());
+    int sel_device = ui->comboBox_devices->currentIndex();
+    cloud = mngCam.capture(sel_device);
     mngPcl.set_cloud(cloud);
     ui->pushButton_visu->setEnabled(true);
+    ui->label_infos->setText("Captured");
 
 }
 
@@ -61,12 +67,19 @@ void MainWindow::on_pushButton_visu_clicked()
 
     else if(ui->radioButton_vizualizer->isChecked())
     {
-        boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = mngPcl.simpleVis(cloud);
+        viewer = mngPcl.simpleVis(cloud, viewer);
+        // Set up the QVTK window
+        //viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
 
-        while (!viewer->wasStopped ())
-        {
-          viewer->spinOnce (100);
-          boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-        }
+//        while (!viewer->wasStopped ())
+//        {
+//          viewer->spinOnce (100);
+//          boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+//        }
+
+        //ui->widget_visu->SetRenderWindow(viewer->getRenderWindow());
+        //viewer->setupInteractor(ui->widget_visu->GetInteractor(), ui->widget_visu->GetRenderWindow());
+        ui->widget_visu->update();
     }
 }
+

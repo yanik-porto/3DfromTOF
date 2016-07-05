@@ -9,12 +9,14 @@ class CameraManager
 {
 public:
 	CameraManager();
+    CameraManager(const short &);
 	~CameraManager();
 
 	//Accessors
 	void get_pts(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
+    void set_numOfShots(const short &);
 
-	pcl::PointCloud<pcl::PointXYZI>::Ptr capture(short);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr capture(const short &);
 	pcl::PointCloud<pcl::PointXYZI>::Ptr convert2pcl(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
     std::vector<std::string> get_devices_name();
 

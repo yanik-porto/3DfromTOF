@@ -45,7 +45,7 @@ LIBS += -L/usr/lib/x86_64-linux-gnu \
         -lboost_filesystem \
         -lboost_date_time
 
-LIBS += -L/usr/lib \
+LIBS += -L/usr/lib/vtk-5.8 \
         -lvtkCommon \
         -lvtkFiltering \
         -lvtkRendering \
