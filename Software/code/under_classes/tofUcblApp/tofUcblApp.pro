@@ -34,7 +34,17 @@ INCLUDEPATH +=  /usr/include/pcl-1.7 \
 
 
 LIBS += -L/usr/lib \
-        -lpcl_common -lpcl_io -lpcl_visualization -lpcl_features
+        -lpcl_common \
+        -lpcl_filters \
+        -lpcl_io \
+        -lpcl_visualization \
+        -lpcl_surface \
+#        -lpcl_stereo \
+#        -lpcl_tracking \
+#        -lpcl_segmentation \
+#        -lpcl_search \
+        -lpcl_registration \
+#        -lpcl_sample_consensus
 
 LIBS += -L/usr/lib \
         -lvoxel -lti3dtof -lvoxelpcl
@@ -42,14 +52,26 @@ LIBS += -L/usr/lib \
 LIBS += -L/usr/lib/x86_64-linux-gnu \
         -lboost_system \
         -lboost_thread \
-        -lboost_filesystem \
-        -lboost_date_time
+#        -lboost_atomic \
+#        -lboost_chrono \
+#        -lboost_context \
+#        -lboost_filesystem \
+#        -lboost_date_time \
+#        -lboost_graph \
+#        -lboost_graph_parallel \
+#        -lboost_iostreams \
+#        -lboost_locale \
+#        -lboost_log \
+#        -lboost_math_c99 \
+#        -lboost_timer \
+#        -lboost_mpi \
+
 
 LIBS += -L/usr/lib/vtk-5.8 \
         -lvtkCommon \
         -lvtkFiltering \
         -lvtkRendering \
         -lQVTK \
-        -lvtkIO \
+#        -lvtkIO \
         -lvtkWidgets \
-        -lvtkGraphics
+#        -lvtkGraphics

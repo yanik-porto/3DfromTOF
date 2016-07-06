@@ -5,6 +5,7 @@
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 #include <iostream>
+#include <map>
 //#include <CameraSystem.h>
 #include "CameraManager.h"
 #include "pclManager.h"
@@ -39,6 +40,9 @@ private:
     pclManager mngPcl;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+    std::map<std::string, int> profilmap;
+
+    void init_viewer();
 };
 
 #endif // MAINWINDOW_H

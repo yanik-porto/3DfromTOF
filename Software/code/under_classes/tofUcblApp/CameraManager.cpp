@@ -46,7 +46,36 @@ std::vector<std::string> CameraManager::get_devices_name()
     return listNames;
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_device)
+std::map<std::string, int> CameraManager::get_profiles_name()
+{
+    std::map<std::string, int> outMap;
+
+    //Scan all connected devices
+    Voxel::CameraSystem sys;
+    Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
+
+    //Load and initialize the first detected camera
+   Voxel::DepthCameraPtr Cam = sys.connect(listDev[0]);
+
+   Voxel::Map<int,Voxel::String> profilMap = Cam->getCameraProfileNames();
+
+   std::cout << profilMap.size() << std::endl;
+   typedef Voxel::Map<int,Voxel::String>::iterator it_type;
+
+   for(it_type iter = profilMap.begin(); iter != profilMap.end(); iter++)
+   {
+       std::cout << iter->first << ": " << iter->second << std::endl;
+       outMap[iter->second] = iter->first;
+   }
+
+   return outMap;
+
+   //currentCam->setCameraProfile(129);
+
+}
+
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_device, const int &id_calib)
 {
 
 	//Initialize the vector of points
@@ -57,19 +86,38 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 	Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
 
 	//Load and initialize the first detected camera
-    Voxel::DepthCameraPtr currentCam = sys.connect(listDev[num_device]);
+   Voxel::DepthCameraPtr currentCam = sys.connect(listDev[num_device]);
 
-	//std::cout << listDev[0]->id() << std::endl;
+//    Voxel::Map<int,Voxel::String> profilMap = currentCam->getCameraProfileNames();
+
+//    std::cout << profilMap.size() << std::endl;
+//    typedef Voxel::Map<int,Voxel::String>::iterator it_type;
+
+//    for(it_type iter = profilMap.begin(); iter != profilMap.end(); iter++)
+//    {
+//        std::cout << iter->first << ": " << iter->second << std::endl;
+//    }
+
+   //Set the calibration mode
+    currentCam->setCameraProfile(id_calib);
+
+//    for(int i = 0; i < profilMap.size(); i++)
+//    {
+//        std::cout << i << std::endl;
+//        std::cout << profilMap[i] << std::endl;
+//    }
+
+    //std::cout << listDev[0]->id() << std::endl;
 
 	if (!currentCam)
 	{
-        std::cerr << "Could not load depth camera for device " << listDev[num_device]->id() << std::endl;
+        std::cerr << "Could not load depth camera for device " << currentCam->id() << std::endl;
 		return false;
 	}
 
 	if (!currentCam->isInitialized())
 	{
-        std::cerr << "Depth camera not initialized for device " << listDev[num_device]->id() << std::endl;
+        std::cerr << "Depth camera not initialized for device " << currentCam->id() << std::endl;
 		return false;
 	}
 
@@ -127,7 +175,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 
 	std::cout << "Saved "
 		<< cloud->width * cloud->height
-        << " data points from the camera " << listDev[num_device]->id()
+        << " data points from the camera " << currentCam->id()
 		<< std::endl;
 
 	return cloud;
