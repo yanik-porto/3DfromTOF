@@ -1,30 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+//***********************************************************************************************************************************************
+// * Destructors and Constructors
+//***********************************************************************************************************************************************
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-//    std::cout<<__cplusplus<<std::endl;
-
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-
-//    if(pcl::io::loadPCDFile<pcl::PointXYZ>("speakerRight.pcd",*cloud) == -1)
-//    {
-////        PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
-//    }
-//    else
-//    {
-//        std::cout << "Loaded "
-//                  << cloud->width * cloud->height
-//                  << " data points from test_pcd.pcd with the following fields: "
-//                  << std::endl;
-////        for (size_t i = 0; i < cloud->points.size (); ++i)
-////          std::cout << "    " << cloud->points[i].x
-////                    << " "    << cloud->points[i].y
-////                    << " "    << cloud->points[i].z << std::endl;
-//    }
 
     ui->pushButton_visu->setEnabled(false);
 
@@ -40,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         ui->comboBox_calib->addItem(QString::fromStdString( iter->first ));
     }
-
 
 
     init_viewer();
@@ -69,6 +53,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+//***********************************************************************************************************************************************
+// * Functions
+//***********************************************************************************************************************************************
+
 void MainWindow::init_viewer()
 {
     viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
@@ -76,6 +65,11 @@ void MainWindow::init_viewer()
     viewer->setupInteractor(ui->widget_visu->GetInteractor(), ui->widget_visu->GetRenderWindow());
     ui->widget_visu->update();
 }
+
+
+//***********************************************************************************************************************************************
+// * Slots
+//***********************************************************************************************************************************************
 
 void MainWindow::on_pushButton_capture_clicked()
 {
@@ -106,22 +100,8 @@ void MainWindow::on_pushButton_visu_clicked()
 
     else if(ui->radioButton_vizualizer->isChecked())
     {
-        //viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
-        //init_viewer();
-        //mngPcl.init_viewer(viewer);
         viewer->removeAllPointClouds();
         viewer = mngPcl.simpleVis(cloud);
-        // Set up the QVTK window
-        //viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
-
-//        while (!viewer->wasStopped ())
-//        {
-//          viewer->spinOnce (100);
-//          boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-//        }
-
-        //ui->widget_visu->SetRenderWindow(viewer->getRenderWindow());
-        //viewer->setupInteractor(ui->widget_visu->GetInteractor(), ui->widget_visu->GetRenderWindow());
         ui->widget_visu->update();
     }
 }

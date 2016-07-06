@@ -1,15 +1,23 @@
 #include "pclManager.h"
 
+//***********************************************************************************************************************************************
+// * Destructors and Constructors
+//***********************************************************************************************************************************************
+
 
 pclManager::pclManager():
     nCloud(0)
 {
 }
 
-
 pclManager::~pclManager()
 {
 }
+
+
+//***********************************************************************************************************************************************
+// * Accessors and Mutators
+//***********************************************************************************************************************************************
 
 bool pclManager::set_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr ptcloud)
 {
@@ -41,6 +49,11 @@ bool pclManager::set_cloud_from_pcd(const std::string &filename)
 	return true;
 }
 
+
+//***********************************************************************************************************************************************
+// * Functions
+//***********************************************************************************************************************************************
+
 bool pclManager::save2pcd(const std::string &filename)
 {
 	//Save the cloud in a .pcd file
@@ -62,7 +75,6 @@ void pclManager::visualizePcl()
 
 void pclManager::init_viewer(boost::shared_ptr<pcl::visualization::PCLVisualizer> pclvisu)
 {
-    //viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
     viewer = pclvisu;
 }
 
@@ -94,8 +106,6 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl:
   // --------------------------------------------
   // -----Open 3D viewer and add point cloud-----
   // --------------------------------------------
-  //boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-  //viewer->resetCamera();
   viewer->setBackgroundColor (0, 0, 0);
   viewer->addPointCloud<pcl::PointXYZI> (intensityCloud, cloudName.toStdString());
   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, cloudName.toStdString());

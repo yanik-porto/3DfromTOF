@@ -19,25 +19,61 @@
 class pclManager
 {
 public:
+
+    /**
+     * Constructors and Destructors
+     */
 	pclManager();
 	~pclManager();
 
+    /**
+     * Accessors and Mutators
+     */
 	bool set_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr);
 	bool set_cloud_from_pcd(const std::string &);
 
+    /**
+     * Initialize the PCLVisualizer by pointing to an already existing PCLVisualizer
+     */
+    void init_viewer(boost::shared_ptr<pcl::visualization::PCLVisualizer>);
+
+    /**
+     * Save the current stored pointcloud into the specified pcd file
+     */
 	bool save2pcd(const std::string &);
+
+    /**
+     * Convert PointCloud<PointXYZI> to PointCloud<PointXYZ>
+     */
+    pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_from_xyzi(pcl::PointCloud<pcl::PointXYZI>::ConstPtr);
+
+    /**
+     * Visualize the current stored pointcloud with the PCLViewer tool
+     */
 	void visualizePcl();
 
-    void init_viewer(boost::shared_ptr<pcl::visualization::PCLVisualizer>);
+    /**
+     * Display a given point cloud inside the PCVisualizer
+     */
     boost::shared_ptr<pcl::visualization::PCLVisualizer> simpleVis (pcl::PointCloud<pcl::PointXYZI>::ConstPtr);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_from_xyzi(pcl::PointCloud<pcl::PointXYZI>::ConstPtr);
+
     //pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr);
 
 
 private:
+    /**
+     * Stored cloud
+     */
 	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+
+    /**
+     * PCLVisualizer
+     */
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 
+    /**
+     * number of clouds passed through the class
+     */
     int nCloud;
 };
 

@@ -26,23 +26,42 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-//    Voxel::String strVox;
-//    CameraSystem sys;
 
 private slots:
+
+    /**
+     * Activated when an event on the widgets occures
+     */
     void on_pushButton_capture_clicked();
 
     void on_pushButton_visu_clicked();
 
 private:
     Ui::MainWindow *ui;
+
+    /**
+     * Initialize the PCLVisualizer through the QVTKWidget
+     */
+    void init_viewer();
+
+    /**
+     * Instance of the classes
+     */
     CameraManager mngCam;
     pclManager mngPcl;
+
+    /**
+     * Current PointCloud and PCLVisualizer
+     */
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+
+    /**
+     * List of calibration profiles
+     */
     std::map<std::string, int> profilmap;
 
-    void init_viewer();
+
 };
 
 #endif // MAINWINDOW_H

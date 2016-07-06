@@ -1,5 +1,9 @@
 #include "CameraManager.h"
 
+//***********************************************************************************************************************************************
+// * Destructors and Constructors
+//***********************************************************************************************************************************************
+
 CameraManager::CameraManager():
     numOfShots(1)
 {
@@ -15,6 +19,10 @@ CameraManager::~CameraManager()
 {
 }
 
+//***********************************************************************************************************************************************
+// * Accessors and Mutators
+//***********************************************************************************************************************************************
+
 void CameraManager::get_pts(std::vector<std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer> ptr)
 {
     //Will not work (const_pointer)
@@ -25,6 +33,11 @@ void CameraManager::set_numOfShots(const short &n)
 {
     numOfShots = n;
 }
+
+
+//***********************************************************************************************************************************************
+// * Get infos
+//***********************************************************************************************************************************************
 
 std::vector<std::string> CameraManager::get_devices_name()
 {
@@ -69,10 +82,12 @@ std::map<std::string, int> CameraManager::get_profiles_name()
    }
 
    return outMap;
-
-   //currentCam->setCameraProfile(129);
-
 }
+
+
+//***********************************************************************************************************************************************
+// * Functions
+//***********************************************************************************************************************************************
 
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_device, const int &id_calib)
@@ -88,26 +103,9 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 	//Load and initialize the first detected camera
    Voxel::DepthCameraPtr currentCam = sys.connect(listDev[num_device]);
 
-//    Voxel::Map<int,Voxel::String> profilMap = currentCam->getCameraProfileNames();
-
-//    std::cout << profilMap.size() << std::endl;
-//    typedef Voxel::Map<int,Voxel::String>::iterator it_type;
-
-//    for(it_type iter = profilMap.begin(); iter != profilMap.end(); iter++)
-//    {
-//        std::cout << iter->first << ": " << iter->second << std::endl;
-//    }
 
    //Set the calibration mode
     currentCam->setCameraProfile(id_calib);
-
-//    for(int i = 0; i < profilMap.size(); i++)
-//    {
-//        std::cout << i << std::endl;
-//        std::cout << profilMap[i] << std::endl;
-//    }
-
-    //std::cout << listDev[0]->id() << std::endl;
 
 	if (!currentCam)
 	{
