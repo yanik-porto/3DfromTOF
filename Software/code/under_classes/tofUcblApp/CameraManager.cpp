@@ -81,9 +81,46 @@ std::map<std::string, int> CameraManager::get_profiles_name()
        outMap[iter->second] = iter->first;
    }
 
+
+
    return outMap;
 }
 
+std::map<std::string, std::string> CameraManager::get_param_descr(const short &num_device)
+{
+    //Initialize the vector of string that will contain all the parameters
+//    std::vector<std::string> paramVec;
+
+    std::map<std::string, std::string> descrMap;
+
+    //Scan all connected devices
+    Voxel::CameraSystem sys;
+    Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
+
+    //Load and initialize the first detected camera
+    Voxel::DepthCameraPtr currentCam = sys.connect(listDev[num_device]);
+
+//    Voxel::FrameRate frate;
+//    currentCam->getFrameRate(frate);
+
+    Voxel::Map< Voxel::String, Voxel::ParameterPtr > paramMap = currentCam->getParameters();
+
+    typedef Voxel::Map< Voxel::String, Voxel::ParameterPtr >::iterator it_type;
+    for( it_type iter = paramMap.begin(); iter != paramMap.end(); iter++ )
+    {
+        //std::cout << iter->first << ": " << iter->second->name() << std::endl;
+        descrMap[iter->first] = iter->second->description();
+    }
+
+    return descrMap;
+//    int coeff_illum;
+//    currentCam->get("coeff_illum",coeff_illum);
+//    std::cout << "coeff_illum value = " << coeff_illum << std::endl;
+
+
+
+
+}
 
 //***********************************************************************************************************************************************
 // * Functions
@@ -102,7 +139,6 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 
 	//Load and initialize the first detected camera
    Voxel::DepthCameraPtr currentCam = sys.connect(listDev[num_device]);
-
 
    //Set the calibration mode
     currentCam->setCameraProfile(id_calib);

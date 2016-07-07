@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
+#include <QWidget>
+#include <QListWidget>
+#include <QFileDialog>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 #include <iostream>
@@ -29,12 +33,18 @@ public:
 
 private slots:
 
+    void display_descriptions();
+
     /**
      * Activated when an event on the widgets occures
      */
     void on_pushButton_capture_clicked();
 
     void on_pushButton_visu_clicked();
+
+    void on_pushButton_import_clicked();
+
+    void on_pushButton_save_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -43,6 +53,11 @@ private:
      * Initialize the PCLVisualizer through the QVTKWidget
      */
     void init_viewer();
+
+    /**
+     * Create property bar
+     */
+    void create_actions();
 
     /**
      * Instance of the classes
@@ -61,7 +76,10 @@ private:
      */
     std::map<std::string, int> profilmap;
 
-
+    /**
+     * List of Actions
+     */
+    QAction *descr;
 };
 
 #endif // MAINWINDOW_H

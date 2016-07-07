@@ -58,7 +58,7 @@ bool pclManager::save2pcd(const std::string &filename)
 {
 	//Save the cloud in a .pcd file
 	pcl::io::savePCDFileASCII(filename, *cloud);
-	std::cerr << "Saved " << cloud->points.size() << " data points to test_pcd.pcd." << std::endl;
+    std::cerr << "Saved " << cloud->points.size() << " data points to " << filename << std::endl;
 	return true;
 }
 

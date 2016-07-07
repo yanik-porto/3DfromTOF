@@ -2,6 +2,8 @@
 
 #include <CameraSystem.h>
 #include <DepthCamera.h>
+//#include <Configuration.h>
+//#include <Parameter.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <iostream>
@@ -29,6 +31,7 @@ public:
      */
     std::vector<std::string> get_devices_name();
     std::map<std::string, int> get_profiles_name();
+    std::map<std::string, std::string> get_param_descr(const short &);
 
     /**
      * Main function for capturing frames from the specified device and calibration mode

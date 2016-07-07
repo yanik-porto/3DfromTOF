@@ -26,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBox_calib->addItem(QString::fromStdString( iter->first ));
     }
 
+    //mngCam.get_cam_infos(ui->comboBox_devices->currentIndex());
+
+
 
     init_viewer();
 
@@ -45,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mngPcl.init_viewer(viewer);
     mngPcl.simpleVis(cloud);
     ui->widget_visu->update();
+
+    create_actions();
 
 }
 
@@ -67,9 +72,51 @@ void MainWindow::init_viewer()
 }
 
 
+void MainWindow::create_actions()
+{
+    // "New session" action (future implementation)
+    descr = new QAction( tr("&Descriptions"), this);
+    descr->setShortcut(tr("CTRL+D"));
+    descr->setStatusTip(tr("Give descriptions of parameters"));
+//    connect(newAct, SIGNAL(triggered()), this, SLOT());
+    descr->setEnabled(true);
+
+    ui->menuParameters->addAction(descr);
+    connect(descr, SIGNAL(triggered()), this, SLOT(display_descriptions()));
+
+
+
+
+}
+
 //***********************************************************************************************************************************************
 // * Slots
 //***********************************************************************************************************************************************
+
+void MainWindow::display_descriptions()
+{
+    QWidget *winDescr = new QWidget();
+    QListWidget *listDescr = new QListWidget(winDescr);
+    listDescr->setGeometry(0, 0, 1000, 500);
+    winDescr->setGeometry(0, 0, 1000, 500);
+    //QLabel *labDescr = new QLabel(winDescr);
+    std::string txtDescr;
+
+    std::map<std::string, std::string> mapDescr = mngCam.get_param_descr(0);
+
+    typedef std::map< std::string, std::string >::iterator it_type;
+    for( it_type iter = mapDescr.begin(); iter != mapDescr.end(); iter++ )
+    {
+        txtDescr = iter->first + ": " + iter->second;
+
+        listDescr->addItem(QString::fromStdString(txtDescr));
+    }
+
+    //labDescr->setText(QString::fromStdString(txtDescr));
+
+    winDescr->show();
+
+}
 
 void MainWindow::on_pushButton_capture_clicked()
 {
@@ -106,3 +153,21 @@ void MainWindow::on_pushButton_visu_clicked()
     }
 }
 
+
+void MainWindow::on_pushButton_import_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName();
+    if(filename.compare("")!=0)
+    {
+        cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
+        mngPcl.set_cloud_from_pcd(filename.toStdString());
+    }
+}
+
+void MainWindow::on_pushButton_save_clicked()
+{
+    QString saveFileName = QFileDialog::getSaveFileName();
+
+    if( saveFileName.compare("")!=0 )
+        mngPcl.save2pcd(saveFileName.toStdString());
+}
