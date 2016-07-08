@@ -29,6 +29,7 @@ public:
     /**
      * return list of connected devices and calibration modes as string
      */
+    const short &get_numb_connected_devices();
     std::vector<std::string> get_devices_name();
     std::map<std::string, int> get_profiles_name();
     std::map<std::string, std::string> get_param_descr(const short &);

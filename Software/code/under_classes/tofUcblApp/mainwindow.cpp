@@ -7,23 +7,33 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    valx(500),
+    valy(500),
+    valz(500),
+    vali(0)
 {
     ui->setupUi(this);
 
+    ui->pushButton_capture->setEnabled(false);
     ui->pushButton_visu->setEnabled(false);
 
-    std::vector<std::string> list = mngCam.get_devices_name();
-    profilmap = mngCam.get_profiles_name();
-
-    for(int i=0; i<list.size(); i++)
-        ui->comboBox_devices->addItem(QString::fromStdString(list[i]));
-
-    typedef std::map<std::string, int>::iterator itmap_type;
-
-    for(itmap_type iter = profilmap.begin(); iter != profilmap.end(); iter++)
+    if(mngCam.get_numb_connected_devices()>0)
     {
-        ui->comboBox_calib->addItem(QString::fromStdString( iter->first ));
+        ui->pushButton_capture->setEnabled(true);
+
+        std::vector<std::string> list = mngCam.get_devices_name();
+        profilmap = mngCam.get_profiles_name();
+
+        for(int i=0; i<list.size(); i++)
+            ui->comboBox_devices->addItem(QString::fromStdString(list[i]));
+
+        typedef std::map<std::string, int>::iterator itmap_type;
+
+        for(itmap_type iter = profilmap.begin(); iter != profilmap.end(); iter++)
+        {
+            ui->comboBox_calib->addItem(QString::fromStdString( iter->first ));
+        }
     }
 
     //mngCam.get_cam_infos(ui->comboBox_devices->currentIndex());
@@ -78,7 +88,6 @@ void MainWindow::create_actions()
     descr = new QAction( tr("&Descriptions"), this);
     descr->setShortcut(tr("CTRL+D"));
     descr->setStatusTip(tr("Give descriptions of parameters"));
-//    connect(newAct, SIGNAL(triggered()), this, SLOT());
     descr->setEnabled(true);
 
     ui->menuParameters->addAction(descr);
@@ -170,4 +179,27 @@ void MainWindow::on_pushButton_save_clicked()
 
     if( saveFileName.compare("")!=0 )
         mngPcl.save2pcd(saveFileName.toStdString());
+}
+
+void MainWindow::on_pushButton_filter_clicked()
+{
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
+    filtered = mngPcl.filter_cloud(cloud, valz, vali);
+    cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud = filtered;
+    mngPcl.set_cloud(cloud);
+}
+
+void MainWindow::on_horizontalSlider_filterz_valueChanged(int value)
+{
+    valz = float(value)/100;
+    ui->label_zv->setText(QString::number(valz));
+}
+
+
+
+void MainWindow::on_horizontalSlider_filteri_valueChanged(int value)
+{
+    vali = float(value)/100000;
+    ui->label_iv->setText(QString::number(vali));
 }

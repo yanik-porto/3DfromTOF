@@ -39,6 +39,15 @@ void CameraManager::set_numOfShots(const short &n)
 // * Get infos
 //***********************************************************************************************************************************************
 
+const short &CameraManager::get_numb_connected_devices()
+{
+    //Scan all connected devices
+    Voxel::CameraSystem sys;
+    Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
+
+    return listDev.size();
+}
+
 std::vector<std::string> CameraManager::get_devices_name()
 {
     //Scan all connected devices

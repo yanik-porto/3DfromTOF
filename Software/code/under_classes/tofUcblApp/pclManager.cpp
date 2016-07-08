@@ -102,6 +102,12 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl:
 {
     nCloud++;
     QString cloudName = "cloud" + QString::number(nCloud);
+//    pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
+
+//    for (size_t i = 0; i < intensityCloud->points.size(); ++i) {
+//         if ((intensityCloud->points[i].intensity>0.003)&&(intensityCloud->points[i].z<(value/100)))//&&(intensityCloud->points[i].z<1.5) && (intensityCloud->points[i].z>1.25) && (intensityCloud->points[i].x>-1.25) && (intensityCloud->points[i].x<1.25) && (intensityCloud->points[i].y>-1.5) && (intensityCloud->points[i].y<1))
+//            filtered->push_back(intensityCloud->at(i));
+//    }
 
   // --------------------------------------------
   // -----Open 3D viewer and add point cloud-----
@@ -109,14 +115,21 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl:
   viewer->setBackgroundColor (0, 0, 0);
   viewer->addPointCloud<pcl::PointXYZI> (intensityCloud, cloudName.toStdString());
   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, cloudName.toStdString());
-  viewer->addCoordinateSystem (1.0);
+  viewer->addCoordinateSystem (0.1);
   //viewer->initCameraParameters ();
   viewer->resetCamera();
   return (viewer);
 }
 
-//pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr ptcloud)
-//{
+pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr ptcloud, const float &threshZ, const float &threshI)
+{
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
+
+    for (size_t i = 0; i < ptcloud->points.size(); ++i)
+    {
+         if ((ptcloud->points[i].intensity>threshI)&&(ptcloud->points[i].z<(threshZ)))//&&(intensityCloud->points[i].z<1.5) && (intensityCloud->points[i].z>1.25) && (intensityCloud->points[i].x>-1.25) && (intensityCloud->points[i].x<1.25) && (intensityCloud->points[i].y>-1.5) && (intensityCloud->points[i].y<1))
+            filtered->push_back(ptcloud->at(i));
+    }
 //    //pcl::PointCloud<pcl::PointXYZ>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZ>);
 //    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filteredx(new pcl::PointCloud<pcl::PointXYZI>);
 //    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filteredy(new pcl::PointCloud<pcl::PointXYZI>);
@@ -158,5 +171,7 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl:
 //    pass.filter(*cloud_filteredx);
 //    cout << "x done\n";
 
-//    return cloud_filteredx;
-//}
+    std::cout << "Filtering " << ptcloud->size() <<" points results in " << filtered->size() << "points" << std::endl;
+
+    return filtered;
+}

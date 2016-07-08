@@ -46,6 +46,13 @@ private slots:
 
     void on_pushButton_save_clicked();
 
+    void on_horizontalSlider_filterz_valueChanged(int value);
+
+    void on_pushButton_filter_clicked();
+
+
+    void on_horizontalSlider_filteri_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
 
@@ -69,6 +76,7 @@ private:
      * Current PointCloud and PCLVisualizer
      */
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+    float valx, valy, valz, vali;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 
     /**
