@@ -22,8 +22,13 @@ int main(int argc, char *argv[])
     engLidBoost.set_cloud(cloud);
 
 
+    engLidBoost.test_apply_lk();
+
+
     mngPcl.init_viewer(viewer);
     viewer = mngPcl.simpleVis(cloud);
+
+
 
     while (!viewer->wasStopped ())
     {
