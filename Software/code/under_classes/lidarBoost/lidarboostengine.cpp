@@ -1,5 +1,6 @@
 #include "lidarboostengine.h"
 
+
 lidarBoostEngine::lidarBoostEngine():
     one_pcl_sz(76800),
     m(320),
@@ -95,7 +96,7 @@ std::vector < Derived > lidarBoostEngine::lk_optical_flow( const MatrixBase<Deri
             -1, -1;
 
     //Apply masks to images and average the result
-    Derived Ix, Iy, It;
+    Derived Ix, Iy, It, A, solutions, x_block, y_block, t_block;
 
     Ix = 0.5 * ( conv2d( I1, robX ) + conv2d( I2, robX ) );
     Iy = 0.5 * ( conv2d( I1, robY ) + conv2d( I2, robY ) );
@@ -106,15 +107,37 @@ std::vector < Derived > lidarBoostEngine::lk_optical_flow( const MatrixBase<Deri
 
     int hw = win_sz/2;
 
-//    for( int i = hw+1; i <= I1.rows()-hw; i++ )
-//    {
-//        for ( int j = hw+1; j <= I1.cols()-hw; j++ )
-//        {
+    for( int i = hw+1; i < I1.rows()-hw; i++ )
+    {
+        for ( int j = hw+1; j < I1.cols()-hw; j++ )
+        {
+//    int i = hw+1;
+//    int j = hw+1;
+            //Take a small block of window size in the filtered images
+            x_block = Ix.block( i-hw, j-hw, win_sz, win_sz);
+            y_block = Iy.block( i-hw, j-hw, win_sz, win_sz);
+            t_block = It.block( i-hw, j-hw, win_sz, win_sz);
 
-//        }
-//    }
+//            //Convert these blocks in vectors
+            Map<Derived> A1( x_block.data(), win_sz*win_sz, 1);
+            Map<Derived> A2( y_block.data(), win_sz*win_sz, 1);
+            Map<Derived> B( t_block.data(), win_sz*win_sz, 1);
 
-    Map<RowVectorXd> Vx( Ix.data(), Ix.size() );
+//            //Organize the vectors in a matrix
+            A = Derived( win_sz*win_sz, 2 );
+            A.block(0, 0, win_sz*win_sz, 1) = A1;
+            A.block(0, 1, win_sz*win_sz, 1) = A2;
+
+//            //Solve the linear least square system
+            solutions = (A.transpose() * A).ldlt().solve(A.transpose() * B);
+
+            //Insert the solutions in the optical flow matrices
+            uv[0](i, j) = solutions(0);
+            uv[1](i, j) = solutions(1);
+
+        }
+    }
+
 //    std::cout << "Vx : " << Vx[76700] << std::endl;
 
 
