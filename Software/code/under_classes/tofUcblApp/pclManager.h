@@ -31,6 +31,7 @@ public:
      */
 	bool set_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr);
 	bool set_cloud_from_pcd(const std::string &);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr get_cloud();
 
     /**
      * Initialize the PCLVisualizer by pointing to an already existing PCLVisualizer
@@ -59,7 +60,8 @@ public:
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr, const float &, const float &);
 
-
+signals:
+    void test();
 private:
     /**
      * Stored cloud

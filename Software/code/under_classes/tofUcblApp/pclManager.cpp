@@ -49,6 +49,10 @@ bool pclManager::set_cloud_from_pcd(const std::string &filename)
 	return true;
 }
 
+pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::get_cloud()
+{
+    return cloud;
+}
 
 //***********************************************************************************************************************************************
 // * Functions

@@ -26,14 +26,14 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
-INCLUDEPATH +=  /usr/include/pcl-1.7 \
+INCLUDEPATH +=  /usr/include/pcl-1.7 \ #/usr/local/include/pcl-1.8
                 /usr/include/eigen3 \
-                /usr/include/voxel-0.6.1 \
+                /usr/include/voxel-0.6.1 \  #usr/include/voxel
                 /usr/include/boost \
                 /usr/include/vtk-5.8
 
 
-LIBS += -L/usr/lib \
+LIBS += -L/usr/lib \        #-L/usr/local/lib
         -lpcl_common \
         -lpcl_filters \
         -lpcl_io \

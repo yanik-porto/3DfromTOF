@@ -93,7 +93,7 @@ void MainWindow::create_actions()
     ui->menuParameters->addAction(descr);
     connect(descr, SIGNAL(triggered()), this, SLOT(display_descriptions()));
 
-
+    //connect(ui->pushButton_stop, SIGNAL(clicked()), &mngPcl, SIGNAL(test()));
 
 
 }
@@ -132,6 +132,7 @@ void MainWindow::on_pushButton_capture_clicked()
 
     //Get index of selected device
     mngCam.set_numOfShots(ui->spinBox_nShots->value());
+    mngCam.set_freq(ui->doubleSpinBox_freq->value());
     int sel_device = ui->comboBox_devices->currentIndex();
 
     //Get index of camera calibration mode
@@ -200,6 +201,7 @@ void MainWindow::on_horizontalSlider_filterz_valueChanged(int value)
 
 void MainWindow::on_horizontalSlider_filteri_valueChanged(int value)
 {
-    vali = float(value)/100000;
+    vali = float(value)/10000;
     ui->label_iv->setText(QString::number(vali));
 }
+

@@ -2,13 +2,16 @@
 
 #include <CameraSystem.h>
 #include <DepthCamera.h>
+#include <VideoMode.h>
 //#include <Configuration.h>
 //#include <Parameter.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <iostream>
 #include <map>
-#include <string>
+//#include <string>
+#include <QObject>
+#include <unistd.h>
 
 class CameraManager
 {
@@ -25,6 +28,7 @@ public:
      */
 	void get_pts(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
     void set_numOfShots(const short &);
+    void set_freq(float);
 
     /**
      * return list of connected devices and calibration modes as string
@@ -33,6 +37,7 @@ public:
     std::vector<std::string> get_devices_name();
     std::map<std::string, int> get_profiles_name();
     std::map<std::string, std::string> get_param_descr(const short &);
+    std::vector<float> get_supported_frameRate();
 
     /**
      * Main function for capturing frames from the specified device and calibration mode
@@ -45,14 +50,20 @@ public:
 	pcl::PointCloud<pcl::PointXYZI>::Ptr convert2pcl(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
 
 
+//    void stop_capture();
 
+signals:
+    void stop();
 
 private:
+
+    bool captureOn;
+
     /**
      * vector of intensity points where are stored the coordinates of the points
-     * coming directly from the the camera
+     * coming directly from the camera
      */
-	std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer > intPts;
+    std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer > intPts;
 
     /**
      * Size of a point cloud built from one shot only
@@ -68,5 +79,11 @@ private:
      * Final output point cloud
      */
 	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+
+    /**
+     * Camera frequency
+     */
+    float freq;
+
 };
 

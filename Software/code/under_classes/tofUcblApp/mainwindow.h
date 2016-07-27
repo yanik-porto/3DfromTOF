@@ -53,6 +53,9 @@ private slots:
 
     void on_horizontalSlider_filteri_valueChanged(int value);
 
+signals:
+    void stop_rec();
+
 private:
     Ui::MainWindow *ui;
 

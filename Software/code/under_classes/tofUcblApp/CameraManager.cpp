@@ -5,12 +5,14 @@
 //***********************************************************************************************************************************************
 
 CameraManager::CameraManager():
-    numOfShots(1)
+    numOfShots(1),
+    captureOn(false)
 {
 
 }
 
-CameraManager::CameraManager(const short &n)
+CameraManager::CameraManager(const short &n):
+    captureOn(false)
 {
     numOfShots = n;
 }
@@ -34,6 +36,10 @@ void CameraManager::set_numOfShots(const short &n)
     numOfShots = n;
 }
 
+void CameraManager::set_freq(float fps)
+{
+    freq = fps;
+}
 
 //***********************************************************************************************************************************************
 // * Get infos
@@ -131,6 +137,32 @@ std::map<std::string, std::string> CameraManager::get_param_descr(const short &n
 
 }
 
+std::vector< float > CameraManager::get_supported_frameRate()
+{
+    std::vector< float > listRate;
+
+    //Scan all connected devices
+    Voxel::CameraSystem sys;
+    Voxel::Vector<Voxel::DevicePtr> listDev = sys.scan();
+
+    //Load and initialize the first detected camera
+   Voxel::DepthCameraPtr Cam = sys.connect(listDev[0]);
+
+   Voxel::Vector< Voxel::SupportedVideoMode > listVideoModes;
+   Cam->getSupportedVideoModes( listVideoModes );
+   std::cout << listVideoModes.size() << std::endl;
+
+   typedef Voxel::Vector< Voxel::SupportedVideoMode >::iterator it_type;
+   int i = 0;
+   for(it_type iter = listVideoModes.begin(); iter != listVideoModes.end(); iter++)
+   {
+       listRate[0] = iter->getFrameRate();
+       std::cout << iter->getFrameRate();
+   }
+
+   return listRate;
+}
+
 //***********************************************************************************************************************************************
 // * Functions
 //***********************************************************************************************************************************************
@@ -138,6 +170,12 @@ std::map<std::string, std::string> CameraManager::get_param_descr(const short &n
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_device, const int &id_calib)
 {
+    //Initialize variables
+    int count = 0;
+    int num_frame = 0;
+    Voxel::TimeStampType lastTimeStamp = 0;
+    int32_t frameCount = numOfShots - 1;
+    int avoid_frame = 60/freq;
 
 	//Initialize the vector of points
     intPts = std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >(numOfShots);
@@ -152,6 +190,11 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
    //Set the calibration mode
     currentCam->setCameraProfile(id_calib);
 
+//    //Set the frequency
+//    Voxel::FrameRate rate(30);
+//    currentCam->setFrameRate(rate);
+
+
 	if (!currentCam)
 	{
         std::cerr << "Could not load depth camera for device " << currentCam->id() << std::endl;
@@ -164,16 +207,17 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 		return false;
 	}
 
-	//Initialize variables
-	int count = 0;
-	Voxel::TimeStampType lastTimeStamp = 0;
-    int32_t frameCount = numOfShots - 1;
+
 	
+
+
 	//Capture point cloud, called whenever the cam is started
 	currentCam->registerCallback(Voxel::DepthCamera::FRAME_XYZI_POINT_CLOUD_FRAME, [&](Voxel::DepthCamera &dc, const Voxel::Frame &frame, Voxel::DepthCamera::FrameType c)
 	{
+
+
 		//Store the data in a frame
-		const Voxel::XYZIPointCloudFrame *d = dynamic_cast<const Voxel::XYZIPointCloudFrame *>(&frame);
+        const Voxel::XYZIPointCloudFrame *d = dynamic_cast<const Voxel::XYZIPointCloudFrame *>(&frame);
 
 		//Check if well captured
 		if (!d)
@@ -181,34 +225,55 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 			std::cout << "Null frame captured? or not of type XYZIPointCloudFrame" << std::endl;
 			return;
 		}
+        if(count%avoid_frame == 0)
+        {
+            std::cout << num_frame << std::endl;
 
-		//Display that a frame has been captured
-		std::cout << "Capture frame " << d->id << "@" << d->timestamp;
+            //Display that a frame has been captured
+            std::cout << "Capture frame " << d->id << "@" << d->timestamp;
 
-		//If not the first shot, display the frequency
-		if (lastTimeStamp != 0)
-			std::cout << " (" << 1E6 / (d->timestamp - lastTimeStamp) << " fps)" << std::endl;
+    //        usleep(100000-freq/60*100000);
 
-		//record when it has been recorded
-		lastTimeStamp = d->timestamp;
+            //If not the first shot, display the frequency
+            if (lastTimeStamp != 0)
+                std::cout << " (" << 1E6 / (d->timestamp - lastTimeStamp) << " fps)" << std::endl;
 
-		sz_cloud = d->size();
-		intPts[count] = d->points.data();
+            //record when it has been recorded
+            lastTimeStamp = d->timestamp;
 
-		//Stop when you have recorded enough frame
-		if (count >= frameCount)
-			dc.stop();
+            sz_cloud = d->size();
+
+
+            intPts[num_frame] = d->points.data();
+
+            //Stop when you have recorded enough frame
+            if (num_frame >= frameCount || !captureOn)
+                dc.stop();
+
+            num_frame++;
+        }
+
+
+
 
 		count++;
+        d->newFrame();
+//        frame.newFrame();
 	});
+
+
 
 	if (currentCam->start())
 	{
+        currentCam->saveFrameStream("saveFrameStream.pcd");
+        captureOn = true;
+
 		//Display framerate
-		Voxel::FrameRate r;
+        Voxel::FrameRate r;
 		if (currentCam->getFrameRate(r))
 			Voxel::logger(Voxel::LOG_INFO) << "Capturing at a frame rate of " << r.getFrameRate() << " fps" << std::endl;
 		currentCam->wait();
+
 	}
 	else
 		std::cerr << "Could not start the depth camera " << currentCam->id() << std::endl;
@@ -230,8 +295,10 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::convert2pcl(std::vector< std
 
 	//Initialize the cloud with the size information
 	cloud = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
-	cloud->width = (sz_cloud)*(numOfShots);
-	cloud->height = 1;
+    cloud->width = (sz_cloud)*(numOfShots);
+    cloud->height = 1;
+//    cloud->width = 320 * numOfShots;
+//    cloud->height = 240 * numOfShots;
 	cloud->is_dense = false;
 	cloud->points.resize(cloud->width * cloud->height);
 
@@ -249,3 +316,14 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::convert2pcl(std::vector< std
 
 	return cloud;
 }
+
+
+
+//***********************************************************************************************************************************************
+// * SLOTS
+//***********************************************************************************************************************************************
+
+//void CameraManager::stop_capture()
+//{
+//    captureOn =  false;
+//}
