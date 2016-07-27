@@ -84,12 +84,14 @@ void pclManager::init_viewer(boost::shared_ptr<pcl::visualization::PCLVisualizer
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr pclManager::xyz_from_xyzi(pcl::PointCloud<pcl::PointXYZI>::ConstPtr intensityCloud)
 {
+    //Initialize the cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr xyzCloud(new pcl::PointCloud<pcl::PointXYZ>);
     xyzCloud->width = intensityCloud->width;
     xyzCloud->height = intensityCloud->height;
     xyzCloud->is_dense = false;
     xyzCloud->points.resize(xyzCloud->width * xyzCloud->height);
 
+    //Copy x, y, and z layers
     pcl::PointXYZ temp;
     for(int i=0; i<intensityCloud->size(); i++)
     {
@@ -104,14 +106,9 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pclManager::xyz_from_xyzi(pcl::PointCloud<pc
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl::PointCloud<pcl::PointXYZI>::ConstPtr intensityCloud)
 {
+    //Give a different name to a new cloud
     nCloud++;
     QString cloudName = "cloud" + QString::number(nCloud);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
-
-//    for (size_t i = 0; i < intensityCloud->points.size(); ++i) {
-//         if ((intensityCloud->points[i].intensity>0.003)&&(intensityCloud->points[i].z<(value/100)))//&&(intensityCloud->points[i].z<1.5) && (intensityCloud->points[i].z>1.25) && (intensityCloud->points[i].x>-1.25) && (intensityCloud->points[i].x<1.25) && (intensityCloud->points[i].y>-1.5) && (intensityCloud->points[i].y<1))
-//            filtered->push_back(intensityCloud->at(i));
-//    }
 
   // --------------------------------------------
   // -----Open 3D viewer and add point cloud-----

@@ -14,11 +14,15 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+HEADERS += \
+    pclManager.h \
+    lidarboostengine.h
 
 SOURCES += main.cpp \
     pclManager.cpp \
     lidarboostengine.cpp
 
+#for PCL
 INCLUDEPATH +=  /usr/include/pcl-1.7 \
                 /usr/include/eigen3 \
                 /usr/include/boost \
@@ -41,20 +45,6 @@ LIBS += -L/usr/lib \
 LIBS += -L/usr/lib/x86_64-linux-gnu \
         -lboost_system \
         -lboost_thread \
-#        -lboost_atomic \
-#        -lboost_chrono \
-#        -lboost_context \
-#        -lboost_filesystem \
-#        -lboost_date_time \
-#        -lboost_graph \
-#        -lboost_graph_parallel \
-#        -lboost_iostreams \
-#        -lboost_locale \
-#        -lboost_log \
-#        -lboost_math_c99 \
-#        -lboost_timer \
-#        -lboost_mpi \
-
 
 LIBS += -L/usr/lib/vtk-5.8 \
         -lvtkCommon \
@@ -63,6 +53,30 @@ LIBS += -L/usr/lib/vtk-5.8 \
         -lQVTK \
         -lvtkWidgets \
 
-HEADERS += \
-    pclManager.h \
-    lidarboostengine.h
+#For OpenCV
+INCLUDEPATH += /usr/local/include
+LIBS += -L"/usr/local/lib"
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+
+
+#For Ceres
+INCLUDEPATH += /usr/local/include/ceres \
+               /usr/include/eigen3 \
+               /usr/include/glog \
+               /usr/include/suitesparse \
+#                /usr/include/atlas \
+                /usr/lib/openmpi/include
+
+LIBS += -L/usr/local/lib \
+        -lceres
+
+LIBS += -L/usr/lib/x86_64-linux-gnu \
+        -lglog \
+        -lsuitesparseconfig -lcholmod
+
+LIBS += -L/usr/lib \
+        -lblas -llapack
+#        -latlas
+
+LIBS += -L/usr/lib/openmpi/lib \
+        -lmpi -fopenmp
