@@ -12,6 +12,7 @@
 //#include <string>
 #include <QObject>
 #include <unistd.h>
+#include <memory>
 
 class CameraManager
 {
@@ -47,7 +48,7 @@ public:
     /**
      * Convert from vector of voxel intensity point to pcl::PointCloud
      */
-	pcl::PointCloud<pcl::PointXYZI>::Ptr convert2pcl(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr convert2pcl(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
 
 
 //    void stop_capture();

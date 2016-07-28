@@ -79,6 +79,7 @@ private:
      * Current PointCloud and PCLVisualizer
      */
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> list_clouds;
     float valx, valy, valz, vali;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 

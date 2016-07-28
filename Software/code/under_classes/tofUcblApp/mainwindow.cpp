@@ -134,14 +134,27 @@ void MainWindow::on_pushButton_capture_clicked()
     mngCam.set_numOfShots(ui->spinBox_nShots->value());
     mngCam.set_freq(ui->doubleSpinBox_freq->value());
     int sel_device = ui->comboBox_devices->currentIndex();
-
+    double freq = ui->doubleSpinBox_freq->value();
+//    double period = double(1/freq)*1000000;
+//    std::cout << period << std::endl;
+    double period = 0;
     //Get index of camera calibration mode
     std::string sel_calib = ui->comboBox_calib->currentText().toStdString();
     int idCalib = profilmap[sel_calib];
 
+    int n_clouds = ui->spinBox_nclouds->value();
+    list_clouds = std::vector< pcl::PointCloud<pcl::PointXYZI>::Ptr >(n_clouds);
+    ui->spinBox_visu->setMaximum(n_clouds-1);
+
     // Setup the cloud pointer
     cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
-    cloud = mngCam.capture(sel_device, idCalib);
+    for(int i = 0; i < n_clouds; i++)
+    {
+        list_clouds[i] = mngCam.capture(sel_device, idCalib);
+        usleep(period);
+    }
+//    cloud = mngCam.capture(sel_device, idCalib);
+    cloud = list_clouds[0];
     mngPcl.set_cloud(cloud);
     ui->pushButton_visu->setEnabled(true);
     ui->label_infos->setText("Captured");
@@ -151,6 +164,10 @@ void MainWindow::on_pushButton_capture_clicked()
 
 void MainWindow::on_pushButton_visu_clicked()
 {
+    int ith_cloud = ui->spinBox_visu->value();
+    cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud = list_clouds[ith_cloud];
+    mngPcl.set_cloud(cloud);
 
     if(ui->radioButton_viewer->isChecked())
         mngPcl.visualizePcl();
@@ -169,8 +186,15 @@ void MainWindow::on_pushButton_import_clicked()
     QString filename = QFileDialog::getOpenFileName();
     if(filename.compare("")!=0)
     {
+        list_clouds = std::vector< pcl::PointCloud<pcl::PointXYZI>::Ptr >(1);
+        ui->spinBox_visu->setMaximum(0);
         cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
         mngPcl.set_cloud_from_pcd(filename.toStdString());
+
+
+        list_clouds[0] = mngPcl.get_cloud();
+        cloud = list_clouds[0];
+        ui->pushButton_visu->setEnabled(true);
     }
 }
 

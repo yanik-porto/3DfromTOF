@@ -36,6 +36,9 @@ public:
      */
     void set_cloud( pcl::PointCloud<pcl::PointXYZI>::Ptr cloud );
 
+    void set_selected_cloud( pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, std::vector<int> numOfClouds);
+
+    void set_from_list_clouds(std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> list_clouds);
     /**
      * Convert a cloud made from different point clouds of "one_pcl_sz" points to
      * a vector of Eigen Matrices, representing a Depth image, with a width of m and a heigh of n
@@ -79,7 +82,12 @@ public:
     Derived nearest_neigh_upsampling(Derived M);
 
     /**
-     * Build a superresolution cloud upsanpled beta times from the saved depth maps
+     *  Compute Regularization term
+     */
+    MatrixXd build_regularization_term(MatrixXd M);
+
+    /**
+     * Build a superresolution cloud upsanmpled beta times from the saved depth maps
      */
     void build_superresolution(short beta);
 

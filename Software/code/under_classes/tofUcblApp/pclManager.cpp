@@ -179,3 +179,29 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::filter_cloud(pcl::PointCloud<pc
 
     return filtered;
 }
+
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> pclManager::set_multiple_clouds_from_pcd(std::vector<std::string> list_filenames)
+{
+    int sz = list_filenames.size();
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> list_Clouds(sz);
+
+    for(int i = 0; i < sz; i++)
+    {
+        //Set the cloud from a .pcd file
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudPcd(new pcl::PointCloud<pcl::PointXYZI>);
+
+    //    cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
+        if (pcl::io::loadPCDFile<pcl::PointXYZI>(list_filenames[i], *cloudPcd) == -1) //* load the file
+        {
+            PCL_ERROR("Couldn't read file test_pcd.pcd \n");
+        }
+        std::cout << "Loaded "
+            << cloudPcd->width * cloudPcd->height
+            << " data points from .pcd "
+            << std::endl;
+
+        list_Clouds[i] = cloudPcd;
+    }
+
+    return list_Clouds;
+}

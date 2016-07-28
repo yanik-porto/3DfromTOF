@@ -61,6 +61,8 @@ public:
     pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr, const float &, const float &);
 
 
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> set_multiple_clouds_from_pcd(std::vector<std::string>);
+
 private:
     /**
      * Stored cloud

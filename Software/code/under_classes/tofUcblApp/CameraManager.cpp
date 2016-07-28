@@ -175,10 +175,11 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
     int num_frame = 0;
     Voxel::TimeStampType lastTimeStamp = 0;
     int32_t frameCount = numOfShots - 1;
-    int avoid_frame = 60/freq;
+    int avoid_frame = 1;//60/freq;
 
 	//Initialize the vector of points
     intPts = std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >(numOfShots);
+    std::vector< std::vector < Voxel::IntensityPoint > > intPoints(numOfShots);
 
 	//Scan all connected devices
 	Voxel::CameraSystem sys;
@@ -207,24 +208,28 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 		return false;
 	}
 
-
+    Voxel::Ptr<Voxel::XYZIPointCloudFrame> ptd;
 	
 
 
 	//Capture point cloud, called whenever the cam is started
-	currentCam->registerCallback(Voxel::DepthCamera::FRAME_XYZI_POINT_CLOUD_FRAME, [&](Voxel::DepthCamera &dc, const Voxel::Frame &frame, Voxel::DepthCamera::FrameType c)
+    currentCam->registerCallback(Voxel::DepthCamera::FRAME_XYZI_POINT_CLOUD_FRAME, [&](Voxel::DepthCamera &dc, const Voxel::Frame &frame, Voxel::DepthCamera::FrameType c)
 	{
 
+        currentCam->wait();
+//        Voxel::Frame frameCopy = frame;
+        Voxel::Ptr<Voxel::Frame> dd = frame.copy();
 
 		//Store the data in a frame
         const Voxel::XYZIPointCloudFrame *d = dynamic_cast<const Voxel::XYZIPointCloudFrame *>(&frame);
 
+//        ptd = new Voxel::XYZIPointCloudFrame(*d);
 		//Check if well captured
-		if (!d)
-		{
-			std::cout << "Null frame captured? or not of type XYZIPointCloudFrame" << std::endl;
-			return;
-		}
+        if (!d)
+        {
+            std::cout << "Null frame captured? or not of type XYZIPointCloudFrame" << std::endl;
+            return;
+        }
         if(count%avoid_frame == 0)
         {
             std::cout << num_frame << std::endl;
@@ -245,6 +250,8 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 
 
             intPts[num_frame] = d->points.data();
+//            for(int i = 0; i < 76800 ; i++)
+//                intPoints[num_frame][i] = intPts[num_frame][i];
 
             //Stop when you have recorded enough frame
             if (num_frame >= frameCount || !captureOn)
@@ -256,35 +263,35 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 
 
 
-		count++;
-        d->newFrame();
+        count++;
+//        d->newFrame();
 //        frame.newFrame();
+//        ptd = d->newFrame();
 	});
 
 
 
-	if (currentCam->start())
-	{
-        currentCam->saveFrameStream("saveFrameStream.pcd");
+    if (currentCam->start())
+    {
         captureOn = true;
 
-		//Display framerate
+        //Display framerate
         Voxel::FrameRate r;
-		if (currentCam->getFrameRate(r))
-			Voxel::logger(Voxel::LOG_INFO) << "Capturing at a frame rate of " << r.getFrameRate() << " fps" << std::endl;
-		currentCam->wait();
+        if (currentCam->getFrameRate(r))
+            Voxel::logger(Voxel::LOG_INFO) << "Capturing at a frame rate of " << r.getFrameRate() << " fps" << std::endl;
+        currentCam->wait();
 
-	}
-	else
-		std::cerr << "Could not start the depth camera " << currentCam->id() << std::endl;
+    }
+    else
+        std::cerr << "Could not start the depth camera " << currentCam->id() << std::endl;
 
-	//Convert from vector to pointCloud
-	cloud = convert2pcl(intPts);
+    //Convert from vector to pointCloud
+    cloud = convert2pcl(intPts);
 
-	std::cout << "Saved "
-		<< cloud->width * cloud->height
+    std::cout << "Saved "
+        << cloud->width * cloud->height
         << " data points from the camera " << currentCam->id()
-		<< std::endl;
+        << std::endl;
 
 	return cloud;
 }

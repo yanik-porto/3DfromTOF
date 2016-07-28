@@ -25,6 +25,7 @@ void lidarBoostEngine::set_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud)
     intensityMap = get_intensity_images( cloud );
 }
 
+
 std::vector< MatrixXd > lidarBoostEngine::convert_pcl_to_eigen(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud)
 {
     std::vector< MatrixXd >eigMat( n_cloud );
@@ -41,6 +42,54 @@ std::vector< MatrixXd > lidarBoostEngine::convert_pcl_to_eigen(pcl::PointCloud<p
     }
 
     return eigMat;
+}
+
+void lidarBoostEngine::set_selected_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, std::vector<int> numOfClouds)
+{
+    sz = cloud->size();
+    n_cloud = sz/one_pcl_sz;
+    std::cout << n_cloud << std::endl;
+
+    int list_sz = numOfClouds.size();
+
+    Y = std::vector< MatrixXd >( list_sz );
+    std::vector< MatrixXd >eigMat( list_sz );
+
+    int num = 0;
+//    typedef std::vector< MatrixXd >::iterator it_type;
+    for( int i = 0; i < list_sz; i++ )
+    {
+        eigMat[i] = MatrixXd( n, m );
+        num = numOfClouds[i];
+
+        for (int j = 0; j < one_pcl_sz; j++ )
+        {
+            eigMat[i]( j/m, j%m ) = cloud->points[ j+num*one_pcl_sz ].z;
+        }
+    }
+
+    Y = eigMat;
+}
+
+void lidarBoostEngine::set_from_list_clouds(std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> list_clouds)
+{
+    int sz_vec = list_clouds.size();
+    sz = list_clouds[0]->size();
+    n_cloud = sz/one_pcl_sz;
+    std::vector< MatrixXd > vecClouds(n_cloud), vecIntensity(n_cloud);
+    Y = std::vector< MatrixXd >( n_cloud*sz_vec );
+    intensityMap = std::vector< MatrixXd >( n_cloud*sz_vec );
+    for(int i = 0; i < sz_vec; i++)
+    {
+        vecClouds = convert_pcl_to_eigen(list_clouds[i]);
+        vecIntensity = get_intensity_images(list_clouds[i]);
+        for(int j = 0; j < n_cloud; j++)
+        {
+            Y[i*n_cloud + j] = vecClouds[j];
+            intensityMap[i*n_cloud + j] = vecIntensity[j];
+            std::cout << i*n_cloud + j << std::endl;
+        }
+    }
 }
 
 std::vector< MatrixXd > lidarBoostEngine::get_intensity_images(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud)
@@ -309,17 +358,23 @@ Derived lidarBoostEngine::nearest_neigh_upsampling(Derived M)
 //}
 //};
 
+void lidarBoostEngine::build_regularization_term(MatrixXd M)
+{
 
+}
 
 void lidarBoostEngine::build_superresolution(short coeff)
 {
+    std::cout<< "Num of clouds : " << Y.size() << std::endl;
+
+//    std::cout << Y[0] << std::endl;
     beta = coeff;
-    std::vector < MatrixXd > optflow = lk_optical_flow( Y[0], Y[2], 5 );
+    std::vector < MatrixXd > optflow = lk_optical_flow( Y[2], Y[4], 10 );
     MatrixXd D( beta*n, beta*m ); //, X( beta*n, beta*m );
 //    SparseMatrix<double> W( beta*n, beta*m ), T( beta*n, beta*m );
 
-    D = apply_optical_flow(Y[0], optflow);
-    T = check_unreliable_samples(intensityMap[0], 0.001);
+    D = apply_optical_flow(Y[2], optflow);
+    T = check_unreliable_samples(intensityMap[2], 0.0001);
 
     MatrixXd up_D = nearest_neigh_upsampling(D);
 
@@ -327,10 +382,10 @@ void lidarBoostEngine::build_superresolution(short coeff)
     cv::Mat M(n, m, CV_32FC1);
 //    MatrixXd diff1(n, m);
 //    diff1 = MatrixXd::Ones(n, m) - Y[0];
-    cv::eigen2cv(Y[0], M);
+    cv::eigen2cv(Y[2], M);
 
     cv::Mat M1(n, m, CV_32FC1);
-    cv::eigen2cv(Y[2], M1);
+    cv::eigen2cv(Y[4], M1);
 
 //    MatrixXd diff(beta*n, beta*m);
 //    diff = MatrixXd::Ones(beta*n, beta*m) - up_D;
@@ -391,14 +446,14 @@ void lidarBoostEngine::build_superresolution(short coeff)
 ////  Solve example using ceres
 
 //         The variable to solve for with its initial value.
-        double initial_x = 5.0;
-        double x = initial_x;
+//        double initial_x = 5.0;
+//        double x = initial_x;
 
-        MatrixXd X(beta*n, beta*m), init_X(beta*n, beta*m);
-        X = MatrixXd::Zero(beta*n,beta*m);
+        MatrixXd X(beta*n, beta*m);// init_X(beta*n, beta*m);
+//        X = MatrixXd::Zero(beta*n,beta*m);
         X = up_D;
 //        MatrixXd init_X( beta*n, beta*m );
-        init_X = X;
+//        init_X = X;
 //        int M[2][2], M2[2][2];
 //        M[0][0] = 5;
 //        M[1][0] = 10;
@@ -417,12 +472,12 @@ void lidarBoostEngine::build_superresolution(short coeff)
 
         Solver::Options options;
         options.linear_solver_type = ceres::DENSE_QR;
-        options.minimizer_progress_to_stdout = true;
+        options.minimizer_progress_to_stdout = false;
         Solver::Summary summary;
 
-        for(int i = 0; i < 10; i++)
+        for(int i = 0; i < X.rows(); i++)
         {
-            for(int j = 0; j < 10; j++)
+            for(int j = 0; j < X.cols(); j++)
             {
 
                 val = X(i, j);
@@ -430,6 +485,7 @@ void lidarBoostEngine::build_superresolution(short coeff)
                 t = T(i, j);
                 d = up_D(i, j);
 
+                std::cout << "i = " << i << "; j = " << j << std::endl;
                 std::cout << "w = " << w << "; t = " << t << "; d = " << d << std::endl;
                 CostFunction* cost_function =
                     new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor(w, t, d));
@@ -445,8 +501,8 @@ void lidarBoostEngine::build_superresolution(short coeff)
 
 
         std::cout << summary.BriefReport() << "\n";
-        std::cout << "x : " << init_X
-                  << " -> " << X << "\n";
+//        std::cout << "x : " << init_X
+//                  << " -> " << X << "\n";
 
         cv::Mat M3(beta*n, beta*m, CV_32FC1);
         cv::eigen2cv(X, M3);
