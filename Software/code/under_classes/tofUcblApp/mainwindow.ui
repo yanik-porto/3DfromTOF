@@ -102,9 +102,9 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>620</y>
+      <y>610</y>
       <width>201</width>
-      <height>51</height>
+      <height>91</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -504,6 +504,19 @@
     </property>
     <property name="maximum">
      <number>0</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_arduino">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>470</y>
+      <width>99</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Arduino</string>
     </property>
    </widget>
   </widget>

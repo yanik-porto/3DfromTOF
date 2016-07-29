@@ -16,6 +16,11 @@
 #include <vtkRenderWindow.h>
 #include <QVTKWidget.h>
 
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#include <QDebug>
+#include <QIODevice>
+
 //using namespace Voxel;
 
 namespace Ui {
@@ -52,6 +57,8 @@ private slots:
 
 
     void on_horizontalSlider_filteri_valueChanged(int value);
+
+    void on_pushButton_arduino_clicked();
 
 signals:
     void stop_rec();
@@ -92,6 +99,10 @@ private:
      * List of Actions
      */
     QAction *descr;
+
+    QSerialPort *serial;
+
+    QString arduino_port_name = "";
 };
 
 #endif // MAINWINDOW_H

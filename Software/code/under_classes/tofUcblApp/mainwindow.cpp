@@ -61,11 +61,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     create_actions();
 
+    serial = new QSerialPort(this);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    serial->close();
+    delete serial;
 }
 
 
@@ -151,6 +154,10 @@ void MainWindow::on_pushButton_capture_clicked()
     for(int i = 0; i < n_clouds; i++)
     {
         list_clouds[i] = mngCam.capture(sel_device, idCalib);
+        if(serial->isWritable())
+            serial->write("r1r");
+        else
+            qDebug() << "Couldn't write to the serial";
         usleep(period);
     }
 //    cloud = mngCam.capture(sel_device, idCalib);
@@ -229,3 +236,33 @@ void MainWindow::on_horizontalSlider_filteri_valueChanged(int value)
     ui->label_iv->setText(QString::number(vali));
 }
 
+
+void MainWindow::on_pushButton_arduino_clicked()
+{
+    foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
+    {
+        if (serialPortInfo.productIdentifier() == 67)
+                            arduino_port_name = serialPortInfo.portName();
+
+        ui->label_infos->setText("Number of available ports: " + QString::number( QSerialPortInfo::availablePorts().length()) +
+                            "\n" + "Vendor ID: " + QString::number(serialPortInfo.vendorIdentifier()) +
+                            "\n" + "Product ID: " + QString::number(serialPortInfo.productIdentifier()) +
+                            "\n" + "Arduino port name = "+ serialPortInfo.portName());
+    }
+
+
+    serial->setPortName(arduino_port_name);
+    serial->setBaudRate(QSerialPort::Baud9600);
+    serial->setDataBits(QSerialPort::Data8);
+    serial->setParity(QSerialPort::NoParity);
+    serial->setStopBits(QSerialPort::OneStop);
+    serial->setFlowControl(QSerialPort::NoFlowControl);
+    serial->open(QIODevice::ReadWrite);
+//    connect(serial,SIGNAL(readyRead()),this,SLOT(serialReader()));
+
+    if(serial->isWritable())
+        serial->write("r1r");
+    else
+        qDebug() << "Couldn't write to the serial";
+
+}

@@ -14,6 +14,7 @@ QMAKE_CXXFLAGS += -std=c++11
 TARGET = tofUcblApp
 TEMPLATE = app
 
+CONFIG += serialport
 
 SOURCES += main.cpp\
         mainwindow.cpp \
