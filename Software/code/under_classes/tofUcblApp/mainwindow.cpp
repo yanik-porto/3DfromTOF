@@ -8,10 +8,10 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    valx(500),
-    valy(500),
-    valz(500),
-    vali(0)
+    valx(0.15),
+    valy(0.25),
+    valz(0.30),
+    vali(0.01)
 {
     ui->setupUi(this);
 
@@ -167,6 +167,8 @@ void MainWindow::on_pushButton_capture_clicked()
     ui->label_infos->setText("Captured");
     //cloud = mngPcl.filter_cloud(cloud);
 
+    on_pushButton_filter_clicked();
+
 }
 
 void MainWindow::on_pushButton_visu_clicked()
@@ -190,16 +192,26 @@ void MainWindow::on_pushButton_visu_clicked()
 
 void MainWindow::on_pushButton_import_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName();
-    if(filename.compare("")!=0)
+    QStringList filenameList = QFileDialog::getOpenFileNames();
+    int sz = filenameList.size();
+    QString filename;
+
+    if(filenameList.at(0).compare("")!=0)
     {
-        list_clouds = std::vector< pcl::PointCloud<pcl::PointXYZI>::Ptr >(1);
-        ui->spinBox_visu->setMaximum(0);
-        cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
-        mngPcl.set_cloud_from_pcd(filename.toStdString());
+        list_clouds = std::vector< pcl::PointCloud<pcl::PointXYZI>::Ptr >(sz);
+        ui->spinBox_visu->setMaximum(sz-1);
+
+        for( int i = 0; i < sz; i++ )
+        {
+            filename = filenameList.at(i);
+
+            cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
+            mngPcl.set_cloud_from_pcd(filename.toStdString());
 
 
-        list_clouds[0] = mngPcl.get_cloud();
+            list_clouds[i] = mngPcl.get_cloud();
+        }
+
         cloud = list_clouds[0];
         ui->pushButton_visu->setEnabled(true);
     }
@@ -208,18 +220,45 @@ void MainWindow::on_pushButton_import_clicked()
 void MainWindow::on_pushButton_save_clicked()
 {
     QString saveFileName = QFileDialog::getSaveFileName();
+    int sz = list_clouds.size();
+    QString nameEach;
 
     if( saveFileName.compare("")!=0 )
-        mngPcl.save2pcd(saveFileName.toStdString());
+    {
+        for( int i = 0; i < sz; i++ )
+        {
+            nameEach = saveFileName + QString::number(i) + ".pcd";
+            mngPcl.set_cloud(list_clouds[i]);
+            mngPcl.save2pcd(nameEach.toStdString());
+        }
+    }
 }
 
 void MainWindow::on_pushButton_filter_clicked()
 {
     pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
-    filtered = mngPcl.filter_cloud(cloud, valz, vali);
-    cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
-    cloud = filtered;
+    int sz = list_clouds.size();
+
+    for( int i = 0; i < sz; i++)
+    {
+        filtered = mngPcl.filter_cloud(list_clouds[i], valx, valy, valz, vali);
+        cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
+        cloud = filtered;
+        list_clouds[i] = cloud;
+    }
     mngPcl.set_cloud(cloud);
+}
+
+void MainWindow::on_horizontalSlider_filterx_valueChanged(int value)
+{
+    valx = float(value)/100;
+    ui->label_xv->setText(QString::number(valx));
+}
+
+void MainWindow::on_horizontalSlider_filtery_valueChanged(int value)
+{
+    valy = float(value)/100;
+    ui->label_yv->setText(QString::number(valy));
 }
 
 void MainWindow::on_horizontalSlider_filterz_valueChanged(int value)
@@ -266,3 +305,8 @@ void MainWindow::on_pushButton_arduino_clicked()
         qDebug() << "Couldn't write to the serial";
 
 }
+
+
+
+
+

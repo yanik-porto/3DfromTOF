@@ -60,6 +60,11 @@ private slots:
 
     void on_pushButton_arduino_clicked();
 
+
+    void on_horizontalSlider_filtery_valueChanged(int value);
+
+    void on_horizontalSlider_filterx_valueChanged(int value);
+
 signals:
     void stop_rec();
 

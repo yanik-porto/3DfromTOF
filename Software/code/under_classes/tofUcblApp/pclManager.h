@@ -58,7 +58,7 @@ public:
      */
     boost::shared_ptr<pcl::visualization::PCLVisualizer> simpleVis (pcl::PointCloud<pcl::PointXYZI>::ConstPtr);
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr, const float &, const float &);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr, const float &, const float &, const float &, const float &);
 
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> set_multiple_clouds_from_pcd(std::vector<std::string>);
 signals:

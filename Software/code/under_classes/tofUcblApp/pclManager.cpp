@@ -125,13 +125,13 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl:
   return (viewer);
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr ptcloud, const float &threshZ, const float &threshI)
+pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::filter_cloud(pcl::PointCloud<pcl::PointXYZI>::Ptr ptcloud, const float &threshX, const float &threshY, const float &threshZ, const float &threshI)
 {
     pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
 
     for (size_t i = 0; i < ptcloud->points.size(); ++i)
     {
-         if ((ptcloud->points[i].intensity>threshI)&&(ptcloud->points[i].z<(threshZ)))//&&(intensityCloud->points[i].z<1.5) && (intensityCloud->points[i].z>1.25) && (intensityCloud->points[i].x>-1.25) && (intensityCloud->points[i].x<1.25) && (intensityCloud->points[i].y>-1.5) && (intensityCloud->points[i].y<1))
+         if ((ptcloud->points[i].intensity>threshI)&&(ptcloud->points[i].z<(threshZ))&&(ptcloud->points[i].y<threshY) && (ptcloud->points[i].y>-threshY) && (ptcloud->points[i].x<threshX) && (ptcloud->points[i].x>-threshX))
             filtered->push_back(ptcloud->at(i));
     }
 //    //pcl::PointCloud<pcl::PointXYZ>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZ>);
