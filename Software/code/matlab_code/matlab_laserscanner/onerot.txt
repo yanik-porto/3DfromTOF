@@ -1,0 +1,29 @@
+function onerot(a,t,N)
+for i=1:N
+        writeDigitalPin(a, 'D11', 1);
+        writeDigitalPin(a, 'D10', 1);
+        writeDigitalPin(a, 'D9', 0);
+        writeDigitalPin(a, 'D8', 0);
+        pause(t);
+        writeDigitalPin(a, 'D11', 0);
+        writeDigitalPin(a, 'D10', 1);
+        writeDigitalPin(a, 'D9', 1);
+        writeDigitalPin(a, 'D8', 0);
+        pause(t);
+        writeDigitalPin(a, 'D11', 0);
+        writeDigitalPin(a, 'D10', 0);
+        writeDigitalPin(a, 'D9',1);
+        writeDigitalPin(a, 'D8', 1);
+        pause(t);
+        writeDigitalPin(a, 'D11', 1);
+        writeDigitalPin(a, 'D10', 0);
+        writeDigitalPin(a, 'D9', 0);
+        writeDigitalPin(a, 'D8', 1);
+        pause(t);
+end
+writeDigitalPin(a, 'D11', 0);
+writeDigitalPin(a, 'D10', 0);
+writeDigitalPin(a, 'D9', 0);
+writeDigitalPin(a, 'D8', 0);
+pause(t);
+end
