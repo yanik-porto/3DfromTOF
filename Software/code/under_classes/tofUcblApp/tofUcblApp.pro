@@ -19,31 +19,34 @@ CONFIG += serialport
 SOURCES += main.cpp\
         mainwindow.cpp \
     CameraManager.cpp \
-    pclManager.cpp
+    pclManager.cpp \
+    icp_registration.cpp
 
 HEADERS  += mainwindow.h \
     CameraManager.h \
-    pclManager.h
+    pclManager.h \
+    icp_registration.h
 
 FORMS    += mainwindow.ui
 
-INCLUDEPATH +=  /usr/include/pcl-1.7 \ #/usr/local/include/pcl-1.8
+INCLUDEPATH +=  /usr/local/include/pcl-1.8 \ #/usr/include/pcl-1.7 \
                 /usr/include/eigen3 \
-                /usr/include/voxel-0.6.1 \  #usr/include/voxel
+                /usr/include/voxel \ #/usr/include/voxel-0.6.1 \
                 /usr/include/boost \
                 /usr/include/vtk-5.8
 
 
-LIBS += -L/usr/lib \        #-L/usr/local/lib
+LIBS +=  -L/usr/local/lib \ #-L/usr/lib \
         -lpcl_common \
         -lpcl_filters \
         -lpcl_io \
         -lpcl_visualization \
         -lpcl_surface \
+         -lpcl_features \
 #        -lpcl_stereo \
 #        -lpcl_tracking \
 #        -lpcl_segmentation \
-#        -lpcl_search \
+        -lpcl_search \
         -lpcl_registration \
 #        -lpcl_sample_consensus
 

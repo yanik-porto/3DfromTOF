@@ -21,6 +21,8 @@
 #include <QDebug>
 #include <QIODevice>
 
+#include "icp_registration.h"
+
 //using namespace Voxel;
 
 namespace Ui {
@@ -65,8 +67,8 @@ private slots:
 
     void on_horizontalSlider_filterx_valueChanged(int value);
 
-signals:
-    void stop_rec();
+
+    void on_pushButton_merge_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -105,9 +107,17 @@ private:
      */
     QAction *descr;
 
+    /**
+     * Port of the Arduino board
+     */
     QSerialPort *serial;
 
+    /**
+     * Port name of the Arduino board
+     */
     QString arduino_port_name = "";
+
+//    ICP_Registration icpreg;
 };
 
 #endif // MAINWINDOW_H

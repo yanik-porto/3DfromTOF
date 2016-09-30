@@ -84,19 +84,23 @@ void pclManager::init_viewer(boost::shared_ptr<pcl::visualization::PCLVisualizer
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr pclManager::xyz_from_xyzi(pcl::PointCloud<pcl::PointXYZI>::ConstPtr intensityCloud)
 {
+    //Transform a cloud with intensity information to a cloud without intensity
     pcl::PointCloud<pcl::PointXYZ>::Ptr xyzCloud(new pcl::PointCloud<pcl::PointXYZ>);
     xyzCloud->width = intensityCloud->width;
     xyzCloud->height = intensityCloud->height;
     xyzCloud->is_dense = false;
     xyzCloud->points.resize(xyzCloud->width * xyzCloud->height);
 
-    pcl::PointXYZ temp;
+//    pcl::PointXYZ temp;
     for(int i=0; i<intensityCloud->size(); i++)
     {
-        temp.x = intensityCloud->at(i).x;
-        temp.y = intensityCloud->at(i).y;
-        temp.z = intensityCloud->at(i).z;
-        xyzCloud->push_back(temp);
+        xyzCloud->points[i].x = intensityCloud->at(i).x;
+        xyzCloud->points[i].y = intensityCloud->at(i).y;
+        xyzCloud->points[i].z = intensityCloud->at(i).z;
+//        temp.x = intensityCloud->at(i).x;
+//        temp.y = intensityCloud->at(i).y;
+//        temp.z = intensityCloud->at(i).z;
+//        xyzCloud->push_back(temp);
     }
 
     return xyzCloud;
@@ -104,14 +108,9 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pclManager::xyz_from_xyzi(pcl::PointCloud<pc
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer> pclManager::simpleVis (pcl::PointCloud<pcl::PointXYZI>::ConstPtr intensityCloud)
 {
+    //Set the name of the new cloud
     nCloud++;
     QString cloudName = "cloud" + QString::number(nCloud);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
-
-//    for (size_t i = 0; i < intensityCloud->points.size(); ++i) {
-//         if ((intensityCloud->points[i].intensity>0.003)&&(intensityCloud->points[i].z<(value/100)))//&&(intensityCloud->points[i].z<1.5) && (intensityCloud->points[i].z>1.25) && (intensityCloud->points[i].x>-1.25) && (intensityCloud->points[i].x<1.25) && (intensityCloud->points[i].y>-1.5) && (intensityCloud->points[i].y<1))
-//            filtered->push_back(intensityCloud->at(i));
-//    }
 
   // --------------------------------------------
   // -----Open 3D viewer and add point cloud-----
@@ -129,51 +128,12 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr pclManager::filter_cloud(pcl::PointCloud<pc
 {
     pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
 
+    //Filter the input cloud with the given values for the 3 coordinates and the intensity
     for (size_t i = 0; i < ptcloud->points.size(); ++i)
     {
          if ((ptcloud->points[i].intensity>threshI)&&(ptcloud->points[i].z<(threshZ))&&(ptcloud->points[i].y<threshY) && (ptcloud->points[i].y>-threshY) && (ptcloud->points[i].x<threshX) && (ptcloud->points[i].x>-threshX))
             filtered->push_back(ptcloud->at(i));
     }
-//    //pcl::PointCloud<pcl::PointXYZ>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZ>);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filteredx(new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filteredy(new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filteredz(new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filteredi(new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::PassThrough<pcl::PointXYZI> pass;
-//    //pcl::PassThrough<pcl::PointXYZ> pass;
-//    /*pcl::VoxelGrid<pcl::PointXYZI> sor;
-//    sor.setInputCloud(cloud);
-//    sor.setLeafSize(0.02f, 0.02f, 0.02f);
-//    sor.filter(*cloud_filtered);
-//    cout << "down done\n";*/
-//    pass.setInputCloud(ptcloud);
-//    pass.setFilterFieldName("intensity");
-//    pass.setFilterLimits(0.007, 1);
-//    pass.filter(*cloud_filteredi);
-//    cout << "i done\n";
-//    //filtered = cloud;
-//    pass.setInputCloud(cloud_filteredi);
-//    pass.setFilterFieldName("z");
-//    pass.setFilterLimits(0, 2);
-//    cout << "load done\n";
-//    //pass.setFilterLimitsNegative (true);
-//    pass.filter(*cloud_filteredz);
-//    cout << "z done\n";
-//    //pcl::PassThrough<pcl::PointXYZ> pass;
-//    pass.setInputCloud(cloud_filteredz);
-//    pass.setFilterFieldName("y");
-//    pass.setFilterLimits(0, 1);
-//    //pass.setFilterLimitsNegative (true);
-//    pass.filter(*cloud_filteredy);
-//    cout << "y done\n";
-//    //pcl::PassThrough<pcl::PointXYZ> pass;
-//    pass.setInputCloud(cloud_filteredy);
-//    pass.setFilterFieldName("x");
-//    pass.setFilterLimits(-2, 2);
-//    //pass.setFilterLimitsNegative (true);
-//    pass.filter(*cloud_filteredx);
-//    cout << "x done\n";
 
     std::cout << "Filtering " << ptcloud->size() <<" points results in " << filtered->size() << "points" << std::endl;
 
@@ -190,7 +150,6 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> pclManager::set_multiple_cloud
         //Set the cloud from a .pcd file
         pcl::PointCloud<pcl::PointXYZI>::Ptr cloudPcd(new pcl::PointCloud<pcl::PointXYZI>);
 
-    //    cloud.reset (new pcl::PointCloud<pcl::PointXYZI>);
         if (pcl::io::loadPCDFile<pcl::PointXYZI>(list_filenames[i], *cloudPcd) == -1) //* load the file
         {
             PCL_ERROR("Couldn't read file test_pcd.pcd \n");

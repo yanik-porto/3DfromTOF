@@ -50,12 +50,6 @@ public:
      */
     pcl::PointCloud<pcl::PointXYZI>::Ptr convert2pcl(std::vector< std::vector<Voxel::IntensityPoint, std::allocator<Voxel::IntensityPoint>>::const_pointer >);
 
-
-//    void stop_capture();
-
-signals:
-    void stop();
-
 private:
 
     bool captureOn;

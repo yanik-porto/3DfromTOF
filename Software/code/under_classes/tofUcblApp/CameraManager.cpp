@@ -217,13 +217,12 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 	{
 
         currentCam->wait();
-//        Voxel::Frame frameCopy = frame;
+
         Voxel::Ptr<Voxel::Frame> dd = frame.copy();
 
 		//Store the data in a frame
         const Voxel::XYZIPointCloudFrame *d = dynamic_cast<const Voxel::XYZIPointCloudFrame *>(&frame);
 
-//        ptd = new Voxel::XYZIPointCloudFrame(*d);
 		//Check if well captured
         if (!d)
         {
@@ -237,8 +236,6 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
             //Display that a frame has been captured
             std::cout << "Capture frame " << d->id << "@" << d->timestamp;
 
-    //        usleep(100000-freq/60*100000);
-
             //If not the first shot, display the frequency
             if (lastTimeStamp != 0)
                 std::cout << " (" << 1E6 / (d->timestamp - lastTimeStamp) << " fps)" << std::endl;
@@ -248,10 +245,8 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
 
             sz_cloud = d->size();
 
-
+            //Store the points in the vector
             intPts[num_frame] = d->points.data();
-//            for(int i = 0; i < 76800 ; i++)
-//                intPoints[num_frame][i] = intPts[num_frame][i];
 
             //Stop when you have recorded enough frame
             if (num_frame >= frameCount || !captureOn)
@@ -260,13 +255,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::capture(const short &num_dev
             num_frame++;
         }
 
-
-
-
         count++;
-//        d->newFrame();
-//        frame.newFrame();
-//        ptd = d->newFrame();
 	});
 
 
@@ -302,7 +291,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::convert2pcl(std::vector< std
 
 	//Initialize the cloud with the size information
 	cloud = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
-    cloud->width = (sz_cloud)*(numOfShots);
+    cloud->width = (sz_cloud);//*(numOfShots);
     cloud->height = 1;
 //    cloud->width = 320 * numOfShots;
 //    cloud->height = 240 * numOfShots;
@@ -310,16 +299,17 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr CameraManager::convert2pcl(std::vector< std
 	cloud->points.resize(cloud->width * cloud->height);
 
 	//Copy every coordinates
-	for (int j = 0; j <= numOfShots-1; j++)
-	{
+//	for (int j = 0; j <= numOfShots-1; j++)
+//	{
+    int j= numOfShots - 1;
 		for (int i = 0; i < sz_cloud; i++)
 		{
-			cloud->points[i + j*sz_cloud].x = intPts[j][i].x;
-			cloud->points[i + j*sz_cloud].y = intPts[j][i].y;
-			cloud->points[i + j*sz_cloud].z = intPts[j][i].z;
-			cloud->points[i + j*sz_cloud].intensity = intPts[j][i].i;
+            cloud->points[i].x = intPts[j][i].x;
+            cloud->points[i].y = intPts[j][i].y;
+            cloud->points[i].z = intPts[j][i].z;
+            cloud->points[i].intensity = intPts[j][i].i;
 		}
-	}
+//	}
 
 	return cloud;
 }
